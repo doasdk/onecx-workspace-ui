@@ -7,6 +7,10 @@ const configs = ['/app/playwright.config.ts', '/app/integration/e2e/playwright.c
 )
 if (configs.length !== 1) throw new Error('Expected exactly one supported Playwright config in the E2E image.')
 const original = configs[0]
+const packageDirectory = ['/app/integration', '/app'].find((directory) =>
+  fs.existsSync(path.join(directory, 'package.json'))
+)
+if (!packageDirectory) throw new Error('Expected an automation package manifest in the E2E image.')
 const directory = path.dirname(original)
 const configDirectory = path.join(directory, 'utils', 'config')
 fs.mkdirSync(configDirectory, { recursive: true, mode: 0o700 })
@@ -59,7 +63,7 @@ export default {
 `
 )
 const command = spawnSync('npm', ['run', input.script, '--', `--config=${wrapper}`], {
-  cwd: '/app',
+  cwd: packageDirectory,
   env: {
     ...process.env,
     CI: 'true',

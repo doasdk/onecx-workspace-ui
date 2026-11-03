@@ -2,17 +2,17 @@ FROM mcr.microsoft.com/playwright:v1.64.0-noble AS dependencies
 
 LABEL description="OneCX Playwright E2E tests"
 
-WORKDIR /app
+WORKDIR /app/integration
 
 ENV CI=true
 
-COPY package.json package-lock.json ./
+COPY integration/package.json integration/package-lock.json ./
 
-RUN npm ci --include=dev
+RUN npm ci --include=dev --ignore-scripts --no-audit --no-fund
 
 FROM dependencies AS test-runtime
 
-COPY integration/e2e/ ./integration/e2e/
+COPY integration/e2e/ ./e2e/
 
 # Copy the container startup script
 COPY integration/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
@@ -31,8 +31,12 @@ RUN apt-get update -qq \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /run/secrets /root/.docker
 
-COPY integration/scripts/ ./integration/scripts/
-COPY integration/platform.json integration/versions.json ./integration/
+COPY integration/scripts/ ./scripts/
+COPY integration/platform.json integration/versions.json ./
+
+RUN node scripts/patch-keycloak-startup.mjs \
+    && node scripts/patch-service-health.mjs \
+    && node scripts/patch-ui-cors.mjs
 
 ENTRYPOINT ["node", "/app/integration/scripts/run-platform.mjs"]
 CMD []

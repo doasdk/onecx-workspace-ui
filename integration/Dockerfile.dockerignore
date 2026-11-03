@@ -2,11 +2,11 @@
 **
 
 # Dependency installation inputs.
-!package.json
-!package-lock.json
+!integration/
+!integration/package.json
+!integration/package-lock.json
 
 # Inputs required by the e2e and orchestrator targets.
-!integration/
 !integration/docker-entrypoint.sh
 !integration/e2e/
 !integration/e2e/**

@@ -50,6 +50,7 @@ jobs:
         with:
           node-version: '22.22.0'
           cache: npm
+          cache-dependency-path: integration/package-lock.json
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -71,7 +72,7 @@ jobs:
           fi
       - name: Install dependencies and apply compatibility patches
         run: |
-          npm ci --include=dev --ignore-scripts --no-audit --no-fund
+          npm --prefix integration ci --include=dev --ignore-scripts --no-audit --no-fund
           node integration/scripts/patch-keycloak-startup.mjs
           node integration/scripts/patch-service-health.mjs
           node integration/scripts/patch-ui-cors.mjs

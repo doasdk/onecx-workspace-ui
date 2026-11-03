@@ -28,18 +28,7 @@
     "apigen-cleanup": "rm -rf $npm_package_config_openapiOutput",
     "apigen-format": "npx prettier $npm_package_config_openapiYaml --write && npx prettier $npm_package_config_openapiOutput/**/* --write",
     "apigen-generate": "openapi-generator-cli generate -i $npm_package_config_openapiYaml -g typescript-angular -c apigen.yaml -o $npm_package_config_openapiOutput --type-mappings=AnyType=object,set=Array",
-    "apigen": "npm run apigen-cleanup && npm run apigen-generate && npm run apigen-format",
-    "image:build": "node scripts/image-command.mjs build",
-    "image:push": "node scripts/image-command.mjs push",
-    "tests:gui": "playwright test --config=integration/e2e/playwright.config.ts --grep=@gui",
-    "tests:a11y": "playwright test --config=integration/e2e/playwright.config.ts --grep=@a11y",
-    "tests:all": "playwright test --config=integration/e2e/playwright.config.ts",
-    "it:dry-run": "onecx-it-runner --dry-run",
-    "it:run": "node scripts/run-platform.mjs",
-    "it:docker": "node scripts/run-in-docker.mjs",
-    "it:serve": "node scripts/serve-platform.mjs",
-    "it:matrix": "node scripts/generate-matrix.mjs",
-    "it:test:matrix": "node scripts/test-matrix.mjs"
+    "apigen": "npm run apigen-cleanup && npm run apigen-generate && npm run apigen-format"
   },
   "husky": {
     "hooks": {

@@ -7,6 +7,7 @@ import { applySelection, components, decodeSelection, isRecord, parseJson, safeS
 import { resolveTestImage } from './test-image-management.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
+const integrationRoot = join(root, 'integration')
 const runId = process.env.RUN_ID || `run-${Date.now()}`
 if (!/^[a-zA-Z0-9_-]+$/.test(runId)) throw new Error('RUN_ID must contain only letters, numbers, _ and -.')
 const runDir = resolve('integration-tests', 'artifacts', runId)
@@ -19,7 +20,7 @@ let importerId
 let e2eContainer
 let stage = 'configuration'
 const started = new Date()
-const lock = parseJson(readFileSync(join(root, 'package-lock.json'), 'utf8'), 'Dependency lockfile')
+const lock = parseJson(readFileSync(join(integrationRoot, 'package-lock.json'), 'utf8'), 'Dependency lockfile')
 const provenance = { runId, runnerVersion: lock.packages['node_modules/@onecx/integration-tests'].version, images: {} }
 const summary = { runId, startTime: started.toISOString(), status: 'failure', exitCode: 1, e2eExecutions: [] }
 
@@ -232,7 +233,7 @@ try {
       const results = join(runDir, 'e2e-results', e2e.networkAlias, 'allure-results')
       const report = join(runDir, 'allure-report')
       const generated = spawnSync(
-        join(root, 'node_modules', '.bin', 'allure'),
+        join(integrationRoot, 'node_modules', '.bin', 'allure'),
         ['generate', results, '--clean', '-o', report],
         { stdio: 'inherit' }
       )
