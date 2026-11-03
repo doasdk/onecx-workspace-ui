@@ -31,3 +31,22 @@ typings
 # System Files
 .DS_Store
 Thumbs.db
+
+# Integration test artifacts and secrets
+/integration/**/test-results/
+/integration/**/playwright-report/
+/integration/**/blob-report/
+/integration/**/playwright/.cache/
+/integration/**/playwright/.auth/
+/integration/**/allure-results/
+/integration/**/allure-report/
+/integration/**/e2e-results/
+/integration/**/artifacts/
+/integration/e2e/utils/config/data.json
+/integration/e2e/utils/config/environments.json
+/integration/**/.env
+/integration/**/.env.*
+/integration/**/.generated/
+/integration/**/integration-tests/
+/integration/**/.runtime/
+/integration/**/results/
