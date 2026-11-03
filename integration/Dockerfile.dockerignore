@@ -1,0 +1,39 @@
+# Exclude everything by default.
+**
+
+# Dependency installation inputs.
+!package.json
+!package-lock.json
+
+# Inputs required by the e2e and orchestrator targets.
+!integration/
+!integration/docker-entrypoint.sh
+!integration/e2e/
+!integration/e2e/**
+!integration/scripts/
+!integration/scripts/**
+!integration/platform.json
+!integration/versions.json
+
+# Never include runtime configuration or secrets.
+integration/e2e/utils/config/
+integration/**/.env
+integration/**/.env.*
+integration/**/.auth/
+integration/**/playwright/.auth/
+
+# Never include generated files or local dependencies.
+integration/**/node_modules/
+integration/**/.cache/
+integration/**/playwright/.cache/
+integration/**/test-results/
+integration/**/playwright-report/
+integration/**/blob-report/
+integration/**/allure-results/
+integration/**/allure-report/
+integration/**/e2e-results/
+integration/**/artifacts/
+integration/**/results/
+integration/**/.generated/
+integration/**/.runtime/
+integration/**/*.log

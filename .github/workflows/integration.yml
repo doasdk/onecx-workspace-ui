@@ -1,0 +1,126 @@
+name: OneCX integration matrix
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  generate_matrix:
+    runs-on: ubuntu-24.04
+    outputs:
+      matrix: ${{ steps.matrix.outputs.matrix }}
+      report_index: ${{ steps.matrix.outputs.report_index }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.0'
+      - name: Generate Cartesian matrix
+        id: matrix
+        env:
+          VERSION_MATRIX_JSON: ${{ vars.VERSION_MATRIX_JSON }}
+          E2E_IMAGE: ${{ vars.E2E_IMAGE }}
+        run: node integration/scripts/generate-matrix.mjs
+
+  integration_matrix:
+    needs: generate_matrix
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-24.04
+    environment: integration
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix: ${{ fromJSON(needs.generate_matrix.outputs.matrix) }}
+    env:
+      CI: 'true'
+      RUN_ID: ${{ matrix.runId }}
+      E2E_IMAGE: ${{ matrix.testImage }}
+      MATRIX_SELECTION_BASE64: ${{ matrix.selectionBase64 }}
+      ENV: container
+      TEST_SCRIPT: ${{ vars.TEST_SCRIPT || 'tests:gui' }}
+      CAPTURE_PRIVATE_ARTIFACTS: ${{ vars.CAPTURE_PRIVATE_ARTIFACTS || 'false' }}
+      DOCKER_HOST: unix:///var/run/docker.sock
+      TESTCONTAINERS_HOST_OVERRIDE: '127.0.0.1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.0'
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Check Docker and configure registry access
+        env:
+          DOCKER_AUTH_CONFIG: ${{ secrets.DOCKER_AUTH_CONFIG }}
+          DOCKER_CONFIG: ${{ runner.temp }}/onecx-docker-auth
+        shell: bash
+        run: |
+          set -euo pipefail
+          printf 'DOCKER_CONFIG=%s\n' "$DOCKER_CONFIG" >> "$GITHUB_ENV"
+          test -S /var/run/docker.sock
+          docker info --format 'Docker server {{.ServerVersion}}; CPUs={{.NCPU}}; memory={{.MemTotal}} bytes'
+          if [ -n "$DOCKER_AUTH_CONFIG" ]; then
+            umask 077
+            mkdir -p "$DOCKER_CONFIG"
+            printf '%s' "$DOCKER_AUTH_CONFIG" > "$DOCKER_CONFIG/config.json"
+          fi
+      - name: Install dependencies and apply compatibility patches
+        run: |
+          npm ci --include=dev --ignore-scripts --no-audit --no-fund
+          node integration/scripts/patch-keycloak-startup.mjs
+          node integration/scripts/patch-service-health.mjs
+          node integration/scripts/patch-ui-cors.mjs
+      - name: Run integration tests
+        env:
+          ENVIRONMENTS_JSON: ${{ secrets.ENVIRONMENTS_JSON }}
+          TEST_DATA_JSON: ${{ secrets.TEST_DATA_JSON }}
+        run: node integration/scripts/run-job.mjs
+      - name: Upload combination results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-results-${{ matrix.runId }}
+          overwrite: true
+          path: results/
+          if-no-files-found: error
+          retention-days: 7
+      - name: Remove registry credentials
+        if: ${{ always() }}
+        env:
+          DOCKER_CONFIG: ${{ runner.temp }}/onecx-docker-auth
+        shell: bash
+        run: rm -f "$DOCKER_CONFIG/config.json"
+
+  collect_reports:
+    needs: [generate_matrix, integration_matrix]
+    if: ${{ always() && needs.generate_matrix.result == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.22.0'
+      - name: Download all available combination results
+        uses: actions/download-artifact@v4
+        with:
+          pattern: integration-results-*
+          path: results/
+          merge-multiple: true
+      - name: Index results and report missing summaries
+        if: ${{ always() }}
+        env:
+          MATRIX_REPORT_INDEX_BASE64: ${{ needs.generate_matrix.outputs.report_index }}
+        run: node integration/scripts/collect-reports.mjs
+      - name: Upload combined reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: matrix-reports-${{ github.run_id }}-${{ github.run_attempt }}
+          path: results/
+          if-no-files-found: error
+          retention-days: 7
