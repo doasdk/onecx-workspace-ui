@@ -1,0 +1,6 @@
+{
+  "ui.shell": ["ghcr.io/onecx/onecx-shell-ui:3.9.0", "ghcr.io/onecx/onecx-shell-ui:3.10.0-rc.1"],
+  "ui.workspace": ["ghcr.io/onecx/onecx-workspace-ui:main"],
+  "bff.workspace": ["ghcr.io/onecx/onecx-workspace-bff:main-native"],
+  "services.workspace": ["ghcr.io/onecx/onecx-workspace-svc:main-native"]
+}

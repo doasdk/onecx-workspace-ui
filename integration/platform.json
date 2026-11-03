@@ -1,0 +1,44 @@
+{
+  "platformConfig": {
+    "importData": true,
+    "withLoggingEnabled": false,
+    "heartbeat": {
+      "enabled": true
+    },
+    "platformOverrides": {
+      "core": {
+        "postgres": { "image": "docker.io/library/postgres:17.9" },
+        "keycloak": { "image": "quay.io/keycloak/keycloak:26.2.0" },
+        "importmanager": { "image": "docker.io/library/node:20" }
+      },
+      "services": {
+        "iamKc": { "image": "ghcr.io/onecx/onecx-iam-kc-svc:main-native" },
+        "parameter": { "image": "ghcr.io/onecx/onecx-parameter-svc:main-native" },
+        "workspace": { "image": "ghcr.io/onecx/onecx-workspace-svc:main-native" },
+        "userProfile": { "image": "ghcr.io/onecx/onecx-user-profile-svc:main-native" },
+        "theme": { "image": "ghcr.io/onecx/onecx-theme-svc:main-native" },
+        "tenant": { "image": "ghcr.io/onecx/onecx-tenant-svc:main-native" },
+        "productStore": { "image": "ghcr.io/onecx/onecx-product-store-svc:main-native" },
+        "permission": { "image": "ghcr.io/onecx/onecx-permission-svc:main-native" }
+      },
+      "bff": {
+        "parameter": { "image": "ghcr.io/onecx/onecx-parameter-bff:main-native" },
+        "shell": { "image": "ghcr.io/onecx/onecx-shell-bff:main-native" },
+        "workspace": { "image": "ghcr.io/onecx/onecx-workspace-bff:main-native" }
+      },
+      "ui": {
+        "shell": { "image": "ghcr.io/onecx/onecx-shell-ui:main" },
+        "workspace": { "image": "ghcr.io/onecx/onecx-workspace-ui:main" }
+      }
+    },
+    "container": {
+      "e2e": [
+        {
+          "networkAlias": "ally-e2e",
+          "baseUrl": "https://onecx-shell-ui:8443",
+          "timeoutMs": 1800000
+        }
+      ]
+    }
+  }
+}

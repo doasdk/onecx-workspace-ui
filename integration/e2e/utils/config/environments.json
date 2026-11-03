@@ -1,0 +1,23 @@
+{
+  "local": {
+    "adminShell": {
+      "baseUrl": "http://onecx.localhost/onecx-shell/admin",
+      "loginUrl": "http://onecx.localhost/onecx-shell/admin/welcome",
+      "workspaceManagementUrl": "http://onecx.localhost/onecx-shell/admin/workspace"
+    }
+  },
+  "container": {
+    "adminShell": {
+      "baseUrl": "https://onecx-shell-ui:8443",
+      "loginUrl": "https://onecx-shell-ui:8443/onecx-shell/admin/workspace",
+      "workspaceManagementUrl": "https://onecx-shell-ui:8443/onecx-shell/admin/workspace"
+    }
+  },
+  "dev": {
+    "adminShell": {
+      "baseUrl": "https://dev.one-cx.org/newShell/admin",
+      "loginUrl": "https://dev.one-cx.org/newShell/admin/welcome",
+      "workspaceManagementUrl": "https://dev.one-cx.org/newShell/admin/workspace"
+    }
+  }
+}
