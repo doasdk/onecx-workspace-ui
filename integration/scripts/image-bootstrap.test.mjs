@@ -8,6 +8,7 @@ const source = readFileSync(new URL('./image-bootstrap.cjs', import.meta.url), '
 
 function bootstrap(files) {
   let command
+  const writtenFiles = []
   const input = {
     metadata: {
       e2e: { baseUrl: 'https://shell:8443', keycloakUrl: 'https://keycloak:8443' }
@@ -31,7 +32,7 @@ function bootstrap(files) {
       readFileSync: () => JSON.stringify(input),
       existsSync: (file) => files.includes(file),
       mkdirSync: () => {},
-      writeFileSync: () => {}
+      writeFileSync: (file, content) => writtenFiles.push({ file, content })
     },
     'node:path': path.posix,
     'node:child_process': {
@@ -46,17 +47,26 @@ function bootstrap(files) {
     URL,
     process: { env: {}, exit: () => {} }
   })
+  command.writtenFiles = writtenFiles
   return command
 }
 
 test('should run the automation package when the image contains the independent manifest', () => {
-  const command = bootstrap(['/app/integration/e2e/playwright.config.ts', '/app/integration/package.json'])
+  const command = bootstrap(['/app/integration/playwright.config.ts', '/app/integration/package.json'])
   assert.equal(command.options.cwd, '/app/integration')
+})
+
+test('should write runtime configuration beside E2E utilities when the config is at integration root', () => {
+  const command = bootstrap(['/app/integration/playwright.config.ts', '/app/integration/package.json'])
+  assert.ok(command.writtenFiles.some(({ file }) => file === '/app/integration/e2e/utils/config/environments.json'))
+  assert.ok(command.writtenFiles.some(({ file }) => file === '/app/integration/e2e/utils/config/data.json'))
+  const wrapper = command.writtenFiles.find(({ file }) => file === '/app/integration/onecx-runtime.config.ts')
+  assert.match(wrapper.content, /video: 'on'/)
 })
 
 test('should prefer the automation package when the image also contains a root manifest', () => {
   const command = bootstrap([
-    '/app/integration/e2e/playwright.config.ts',
+    '/app/integration/playwright.config.ts',
     '/app/integration/package.json',
     '/app/package.json'
   ])
@@ -74,8 +84,5 @@ test('should support the root package when the image uses the flat test layout',
 })
 
 test('should reject the image when no automation package manifest exists', () => {
-  assert.throws(
-    () => bootstrap(['/app/integration/e2e/playwright.config.ts']),
-    /Expected an automation package manifest/
-  )
+  assert.throws(() => bootstrap(['/app/integration/playwright.config.ts']), /Expected an automation package manifest/)
 })

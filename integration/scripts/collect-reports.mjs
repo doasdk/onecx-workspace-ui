@@ -20,8 +20,8 @@ const index = entries.map(({ runId, selection }) => {
     status: summary.status,
     failureStage: summary.failureStage,
     summary: `${runId}/summary.json`,
-    report: existsSync(join('results', runId, 'private', 'allure-report', 'index.html'))
-      ? `${runId}/private/allure-report/index.html`
+    report: existsSync(join('results', runId, 'allure-report', 'index.html'))
+      ? `${runId}/allure-report/index.html`
       : null
   }
 })

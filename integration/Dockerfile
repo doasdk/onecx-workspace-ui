@@ -13,6 +13,7 @@ RUN npm ci --include=dev --ignore-scripts --no-audit --no-fund
 FROM dependencies AS test-runtime
 
 COPY integration/e2e/ ./e2e/
+COPY integration/playwright.config.ts ./playwright.config.ts
 
 # Copy the container startup script
 COPY integration/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh

@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "license": "Apache-2.0",
   "scripts": {
-    "tests:gui": "playwright test --config=e2e/playwright.config.ts --grep=@gui",
-    "tests:a11y": "playwright test --config=e2e/playwright.config.ts --grep=@a11y",
-    "tests:all": "playwright test --config=e2e/playwright.config.ts",
+    "tests:gui": "playwright test --config=playwright.config.ts --grep=@gui",
+    "tests:a11y": "playwright test --config=playwright.config.ts --grep=@a11y",
+    "tests:all": "playwright test --config=playwright.config.ts",
     "image:build": "node scripts/image-command.mjs build",
     "image:push": "node scripts/image-command.mjs push",
     "it:dry-run": "node scripts/run-platform.mjs --dry-run",
