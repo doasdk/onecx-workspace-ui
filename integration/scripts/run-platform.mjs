@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -258,6 +258,7 @@ try {
     }
   }
   if (allureResultsDir && existsSync(allureResultsDir)) {
+    cpSync(allureResultsDir, join(publicDir, 'allure-results'), { recursive: true })
     const generated = spawnSync(
       join(integrationRoot, 'node_modules', '.bin', 'allure'),
       ['generate', allureResultsDir, '--clean', '-o', join(publicDir, 'allure-report')],

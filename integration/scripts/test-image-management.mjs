@@ -1,6 +1,6 @@
 import { validateImage } from './matrix.mjs'
 
-export const TEST_IMAGE = 'ghcr.io/doasdk/onecx-workspace-ui-e2e:0.0.3'
+export const TEST_IMAGE = 'ghcr.io/doasdk/onecx-workspace-ui-e2e:0.0.4'
 
 export function resolveTestImage(env = process.env) {
   return validateImage(env.E2E_IMAGE || TEST_IMAGE)

@@ -1,4 +1,4 @@
-import { closeSync, copyFileSync, mkdirSync, mkdtempSync, openSync, readFileSync, rmSync } from 'node:fs'
+import { closeSync, copyFileSync, existsSync, mkdirSync, mkdtempSync, openSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { spawn } from 'node:child_process'
@@ -8,6 +8,10 @@ const env = { ...process.env }
 env.RUN_ID ||= `job-${env.GITHUB_RUN_ID || Date.now()}-${env.GITHUB_RUN_ATTEMPT || '1'}`
 if (!/^[a-zA-Z0-9_-]+$/.test(env.RUN_ID)) throw new Error('Invalid RUN_ID.')
 env.E2E_EXECUTION_MODE = 'docker-copy'
+if (!env.TESTCONTAINERS_HOST_OVERRIDE && !existsSync('/.dockerenv')) {
+  // Docker publishes ports on the machine running this script, so localhost is correct outside a container.
+  env.TESTCONTAINERS_HOST_OVERRIDE = '127.0.0.1'
+}
 if (!env.TESTCONTAINERS_HOST_OVERRIDE) {
   const route = readFileSync('/proc/net/route', 'utf8')
     .split('\n')

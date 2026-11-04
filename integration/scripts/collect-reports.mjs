@@ -1,5 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
+import { generateCombinedReport } from './combine-allure.mjs'
 
 const encoded = process.env.MATRIX_REPORT_INDEX_BASE64
 if (!encoded) throw new Error('Missing matrix report index.')
@@ -26,5 +27,11 @@ const index = entries.map(({ runId, selection }) => {
   }
 })
 writeFileSync(join('results', 'matrix-index.json'), JSON.stringify(index, null, 2))
+generateCombinedReport(
+  'results',
+  entries.map(({ runId }) => runId),
+  'integration-tests',
+  join('results', 'combined-allure-report')
+)
 console.table(index.map(({ runId, status, failureStage }) => ({ runId, status, failureStage })))
 if (missing) process.exitCode = 1

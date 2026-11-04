@@ -21,6 +21,18 @@ it does not install the Angular application.
 Each integration run generates an Allure report in `results/<run-id>/allure-report`,
 regardless of the private-artifact capture setting. The workflow uploads this directory
 as part of its run results artifact, and the combined matrix index links to each report.
+The raw `allure-results` are kept per run, and the `collect_reports` job merges them into one
+report at `combined-allure-report` in the `matrix-reports-*` artifact. `it:test:matrix` builds
+the same report locally at `results/<batch>/combined-allure-report`. The Suites view groups
+tests as `integration-job-0001` > `chromium`, `firefox`, or `webkit` > executed tests,
+with one numbered job per matrix combination in matrix order. Missing results do not
+renumber later jobs and are reported in the collection logs.
+Allure suite dropdowns do not support descriptions. Each test's description instead includes
+a compact mapping of component names to requested image versions. Full version/image
+provenance remains available as a `versions.json` attachment. Existing test descriptions
+and attachments are preserved.
+Serve the report over HTTP (for example `npx allure open <dir>`) rather than opening
+`index.html` directly.
 
 Build and publish the test image from the repository root with `E2E_IMAGE` set:
 
