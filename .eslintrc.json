@@ -10,6 +10,8 @@
     "helm/**",
     "integration/scripts/**",
     "node_modules/**",
+    "results/**",
+    "integration-tests/**",
     "src/app/shared/generated/**",
     "src/assets/api/*",
     "src/**/*.ico",
