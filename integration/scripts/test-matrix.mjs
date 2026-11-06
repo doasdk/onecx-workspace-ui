@@ -4,6 +4,7 @@ import { execFileSync, spawn } from 'node:child_process'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { generateCombinedReport } from './combine-allure.mjs'
 import { expandMatrix, loadMatrix } from './matrix.mjs'
 import { resolveTestImage } from './test-image-management.mjs'
 
@@ -69,6 +70,21 @@ for (const [index, selection] of combinations.entries()) {
     )
   )
   if (result.signal) break
+}
+try {
+  const combined = join(directory, 'combined-allure-report')
+  if (
+    generateCombinedReport(
+      join(root, 'results'),
+      results.map(({ runId }) => runId),
+      directory,
+      combined
+    )
+  ) {
+    console.log(`Combined Allure report: ${combined} (serve it with: npx allure open ${combined})`)
+  }
+} catch (error) {
+  console.error(error.message)
 }
 console.table(results.map(({ runId, exitCode, signal }) => ({ runId, exitCode, signal })))
 console.log(`Matrix summary: results/${batch}/matrix-summary.json`)

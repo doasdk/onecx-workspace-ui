@@ -1,6 +1,7 @@
 import { expect, Locator, Page } from '@playwright/test'
 import * as allure from 'allure-js-commons'
 import { environment } from '../../utils/data/environment'
+import { enterSecret } from '../../utils/helpers/commonMethods'
 
 export class KeycloakLoginPage {
   readonly page: Page
@@ -53,7 +54,7 @@ export class KeycloakLoginPage {
   async loginToKeycloak(username: string, password: string): Promise<void> {
     await allure.step('Login to OneCX via Keycloak', async () => {
       await this.enterUsername(username)
-      await this.enterPassword(password)
+      await enterSecret(this.passwordInput, password)
       await this.clickSignInButton()
 
       await this.verifyLoginSuccessful()
@@ -86,12 +87,6 @@ export class KeycloakLoginPage {
   async enterUsername(username: string) {
     await allure.step('Enter username', async () => {
       await this.usernameInput.fill(username)
-    })
-  }
-
-  async enterPassword(password: string) {
-    await allure.step(`Enter password`, async () => {
-      await this.passwordInput.fill(password)
     })
   }
 

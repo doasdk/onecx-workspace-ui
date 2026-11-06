@@ -19,3 +19,6 @@ Dockerfile
 *.sh
 src/app/shared/generated
 src/assets/api
+
+results
+integration-tests

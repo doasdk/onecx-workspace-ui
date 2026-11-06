@@ -2,13 +2,23 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { spawnSync } = require('node:child_process')
 const input = JSON.parse(fs.readFileSync('/tmp/onecx-runtime.json', 'utf8'))
-const configs = ['/app/playwright.config.ts', '/app/integration/e2e/playwright.config.ts'].filter((file) =>
-  fs.existsSync(file)
-)
+const configs = [
+  '/app/integration/playwright.config.ts',
+  '/app/integration/e2e/playwright.config.ts',
+  '/app/playwright.config.ts'
+].filter((file) => fs.existsSync(file))
 if (configs.length !== 1) throw new Error('Expected exactly one supported Playwright config in the E2E image.')
 const original = configs[0]
+const packageDirectory = ['/app/integration', '/app'].find((directory) =>
+  fs.existsSync(path.join(directory, 'package.json'))
+)
+if (!packageDirectory) throw new Error('Expected an automation package manifest in the E2E image.')
 const directory = path.dirname(original)
-const configDirectory = path.join(directory, 'utils', 'config')
+const testDirectory = path.resolve(
+  directory,
+  original.includes('/e2e/') || !directory.endsWith('/integration') ? 'tests' : 'e2e/tests'
+)
+const configDirectory = path.join(path.dirname(testDirectory), 'utils', 'config')
 fs.mkdirSync(configDirectory, { recursive: true, mode: 0o700 })
 const shell = input.environments[input.environment].adminShell
 const oldOrigin = new URL(shell.baseUrl).origin
@@ -53,13 +63,13 @@ export default {
     ignoreHTTPSErrors: true,
     trace: ${JSON.stringify(input.capture ? 'on-first-retry' : 'off')},
     screenshot: ${JSON.stringify(input.capture ? 'only-on-failure' : 'off')},
-    video: 'off',
+    video: 'on',
   },
 };
 `
 )
 const command = spawnSync('npm', ['run', input.script, '--', `--config=${wrapper}`], {
-  cwd: '/app',
+  cwd: packageDirectory,
   env: {
     ...process.env,
     CI: 'true',

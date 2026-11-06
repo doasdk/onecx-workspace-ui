@@ -27,6 +27,7 @@ connect.lock
 typings
 *.log
 *.sh
+!/integration/docker-entrypoint.sh
 
 # System Files
 .DS_Store
@@ -50,3 +51,5 @@ Thumbs.db
 /integration/**/integration-tests/
 /integration/**/.runtime/
 /integration/**/results/
+/integration-tests/
+/results/
