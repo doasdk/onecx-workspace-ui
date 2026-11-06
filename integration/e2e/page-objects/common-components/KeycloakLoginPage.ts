@@ -90,12 +90,6 @@ export class KeycloakLoginPage {
     })
   }
 
-  // async enterPassword(password: string) {
-  //   await allure.step(`Enter password`, async () => {
-  //     await this.passwordInput.fill(password)
-  //   })
-  // }
-
   async clickSignInButton() {
     await allure.step('Click Sign In button', async () => {
       await this.signInButton.click()
