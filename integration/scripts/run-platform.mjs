@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { cpSync, existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { dirname, join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -7,6 +7,7 @@ import { applySelection, components, decodeSelection, isRecord, parseJson, safeS
 import { resolveTestImage } from './test-image-management.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
+const integrationRoot = join(root, 'integration')
 const runId = process.env.RUN_ID || `run-${Date.now()}`
 if (!/^[a-zA-Z0-9_-]+$/.test(runId)) throw new Error('RUN_ID must contain only letters, numbers, _ and -.')
 const runDir = resolve('integration-tests', 'artifacts', runId)
@@ -17,9 +18,10 @@ let interruptedBy
 let secretDir
 let importerId
 let e2eContainer
+let allureResultsDir
 let stage = 'configuration'
 const started = new Date()
-const lock = parseJson(readFileSync(join(root, 'package-lock.json'), 'utf8'), 'Dependency lockfile')
+const lock = parseJson(readFileSync(join(integrationRoot, 'package-lock.json'), 'utf8'), 'Dependency lockfile')
 const provenance = { runId, runnerVersion: lock.packages['node_modules/@onecx/integration-tests'].version, images: {} }
 const summary = { runId, startTime: started.toISOString(), status: 'failure', exitCode: 1, e2eExecutions: [] }
 
@@ -81,6 +83,7 @@ try {
   const template = parseJson(readFileSync(join(root, 'integration', 'platform.json'), 'utf8'), 'Platform template')
   const config = applySelection(template, decodeSelection(process.env.MATRIX_SELECTION_BASE64), resolveTestImage())
   const e2e = config.platformConfig.container.e2e[0]
+  allureResultsDir = join(runDir, 'e2e-results', e2e.networkAlias, 'allure-results')
   const environments = runtimeJson(
     'ENVIRONMENTS_JSON_FILE',
     'ENVIRONMENTS_JSON',
@@ -227,17 +230,6 @@ try {
       summary.status = 'success'
       summary.exitCode = 0
     }
-    if (privateArtifacts && records?.length) {
-      stage = 'report'
-      const results = join(runDir, 'e2e-results', e2e.networkAlias, 'allure-results')
-      const report = join(runDir, 'allure-report')
-      const generated = spawnSync(
-        join(root, 'node_modules', '.bin', 'allure'),
-        ['generate', results, '--clean', '-o', report],
-        { stdio: 'inherit' }
-      )
-      if (generated.error || generated.status !== 0) throw new Error('Allure report generation failed.')
-    }
   }
 } catch (error) {
   summary.status = 'failure'
@@ -263,6 +255,20 @@ try {
       summary.exitCode = 1
       summary.failureStage = 'cleanup'
       console.error('Platform cleanup failed.', error)
+    }
+  }
+  if (allureResultsDir && existsSync(allureResultsDir)) {
+    cpSync(allureResultsDir, join(publicDir, 'allure-results'), { recursive: true })
+    const generated = spawnSync(
+      join(integrationRoot, 'node_modules', '.bin', 'allure'),
+      ['generate', allureResultsDir, '--clean', '-o', join(publicDir, 'allure-report')],
+      { stdio: 'inherit' }
+    )
+    if (generated.error || generated.status !== 0) {
+      summary.status = 'failure'
+      summary.exitCode = 1
+      summary.failureStage = 'report'
+      console.error('Allure report generation failed.', generated.error || `Exit code: ${generated.status}`)
     }
   }
   if (secretDir) rmSync(secretDir, { recursive: true, force: true })

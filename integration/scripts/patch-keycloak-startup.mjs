@@ -33,36 +33,39 @@ if (Object.hasOwn(realm.attributes, 'frontendUrl')) {
   patchedRealm = realmSource.replace(override, '')
   JSON.parse(patchedRealm)
 }
+// Slow CI runners need about 4+ minutes for Keycloak augmentation, schema creation and realm import.
+const command = ".withCommand(['start-dev', '--import-realm']).withNetworkAliases('keycloak-app')"
+const probe = '            interval: 10_000,\n            timeout: 5_000,\n'
 const changes = [
   {
-    before:
-      ".withCommand(['start-dev', '--import-realm']).withNetworkAliases('keycloak-app').withStartupTimeout(120_000);",
-    after:
-      ".withCommand(['start-dev', '--import-realm']).withNetworkAliases('keycloak-app').withStartupTimeout(300_000);"
+    // Original package code, then the previous patch version (kept so already patched installs upgrade cleanly).
+    before: [`${command}.withStartupTimeout(120_000);`, `${command}.withStartupTimeout(300_000);`],
+    after: `${command}.withStartupTimeout(900_000);`
   },
   {
-    before: '            interval: 10_000,\n            timeout: 5_000,\n            retries: 10,',
-    after:
-      '            interval: 10_000,\n            timeout: 5_000,\n            startPeriod: 120_000,\n            retries: 12,'
+    before: [`${probe}            retries: 10,`, `${probe}            startPeriod: 120_000,\n            retries: 12,`],
+    after: `${probe}            startPeriod: 480_000,\n            retries: 30,`
   }
 ]
 let patched = source.replace(/\r\n/g, '\n')
-const applied = changes.map(({ before, after }) => {
-  const beforeCount = patched.split(before).length - 1
-  const afterCount = patched.split(after).length - 1
-  if (beforeCount === 1 && afterCount === 0) return false
-  if (beforeCount === 0 && afterCount === 1) return true
+const count = (text) => patched.split(text).length - 1
+const states = changes.map(({ before, after }) => {
+  const matches = before.filter((text) => count(text) === 1)
+  if (count(after) === 1 && matches.length === 0) return 'applied'
+  if (count(after) === 0 && matches.length === 1 && before.every((text) => count(text) <= 1)) return matches[0]
   throw new Error('Unexpected Keycloak implementation. Refusing to apply startup patch.')
 })
-if (applied.some(Boolean) && !applied.every(Boolean)) {
+if (states.some((state) => state === 'applied') && !states.every((state) => state === 'applied')) {
   throw new Error('Partially applied Keycloak startup patch. Restore dependencies with npm ci.')
 }
-if (!applied.every(Boolean)) {
-  for (const { before, after } of changes) patched = patched.replace(before, after)
+if (!states.every((state) => state === 'applied')) {
+  changes.forEach(({ after }, index) => {
+    patched = patched.replace(states[index], after)
+  })
   writeFileSync(file, patched)
 }
 if (patchedRealm !== realmSource) writeFileSync(realmFile, patchedRealm)
 console.log(
-  'Keycloak startup patch active: timeout=300s, startPeriod=120s, interval=10s, check timeout=5s, retries=12.'
+  'Keycloak startup patch active: timeout=900s, startPeriod=480s, interval=10s, check timeout=5s, retries=30.'
 )
 console.log('Keycloak realm patch active: browser URLs inherit HTTPS KC_HOSTNAME; stale HTTP frontendUrl removed.')

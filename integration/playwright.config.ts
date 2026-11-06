@@ -1,6 +1,6 @@
 import 'dotenv/config'
 import { defineConfig, devices } from '@playwright/test'
-import { environment } from './utils/data/environment'
+import { environment } from './e2e/utils/data/environment'
 import * as path from 'node:path'
 
 const outputRoot = path.resolve(process.env.OUTPUT_DIR || '.')
@@ -10,8 +10,9 @@ const capturePrivateArtifacts = process.env.CAPTURE_PRIVATE_ARTIFACTS === 'true'
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  tsconfig: './tsconfig.json',
   timeout: 60000, // time for tests to finish
-  testDir: './tests',
+  testDir: './e2e/tests',
   outputDir: path.join(outputRoot, 'test-results'),
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -33,9 +34,9 @@ export default defineConfig({
 
     //allure reporter configuration
     screenshot: capturePrivateArtifacts ? 'only-on-failure' : 'off',
+    video: 'on',
     // The platform CA is injected at runtime. Browser TLS bypass is scoped to platform runs.
     ignoreHTTPSErrors: !!process.env.TLS_CA_CERT_PATH
-    // video: 'retain-on-failure',
   },
 
   /* Configure projects for major browsers */
