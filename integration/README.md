@@ -13,6 +13,18 @@ npm --prefix integration ci --include=dev --ignore-scripts --no-audit --no-fund
 npm --prefix integration run tests:gui
 ```
 
+`integration` is the automation root: `playwright.config.ts` selects tests from
+`e2e/tests`, and `tsconfig.json` covers both the Playwright configuration and all
+E2E TypeScript files. Do not put duplicate configuration files under `e2e`.
+The E2E and orchestrator images preserve this layout at `/app/integration`.
+The repository-root `tests:gui`, `tests:a11y`, and `tests:all` commands delegate to
+the automation package, including any arguments passed after `--`. Local test
+artifacts default to the `integration` directory unless `OUTPUT_DIR` is set.
+Runtime environment and test-data files remain under `e2e/utils/config`, or can
+be supplied through the runtime configuration environment variables.
+The image bootstrap also accepts legacy layouts in previously published E2E
+images; these compatibility paths are not additional repository configurations.
+
 The local Playwright command requires browser installations and runtime configuration
 for the selected environment. The integration workflow runs the tests in the published
 `E2E_IMAGE` instead, which includes Playwright browsers and automation dependencies.

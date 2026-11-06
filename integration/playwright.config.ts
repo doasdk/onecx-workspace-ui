@@ -10,6 +10,7 @@ const capturePrivateArtifacts = process.env.CAPTURE_PRIVATE_ARTIFACTS === 'true'
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  tsconfig: './tsconfig.json',
   timeout: 60000, // time for tests to finish
   testDir: './e2e/tests',
   outputDir: path.join(outputRoot, 'test-results'),

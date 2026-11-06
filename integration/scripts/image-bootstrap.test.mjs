@@ -73,6 +73,31 @@ test('should prefer the automation package when the image also contains a root m
   assert.equal(command.options.cwd, '/app/integration')
 })
 
+function loadRuntimeConfig() {
+  const command = bootstrap(['/app/integration/playwright.config.ts', '/app/integration/package.json'])
+  const wrapper = command.writtenFiles.find(({ file }) => file === '/app/integration/onecx-runtime.config.ts')
+  const module = { exports: {} }
+  runInNewContext(wrapper.content.replace('export default', 'module.exports ='), {
+    module,
+    require: (name) => {
+      if (name === 'node:path') return path.posix
+      assert.equal(name, '/app/integration/playwright.config.ts')
+      return { default: { testDir: './e2e/tests', tsconfig: './tsconfig.json' } }
+    }
+  })
+  return { wrapper, config: module.exports }
+}
+
+test('should preserve the E2E test directory when the runtime wrapper loads the integration root config', () => {
+  const { config } = loadRuntimeConfig()
+  assert.equal(config.testDir, '/app/integration/e2e/tests')
+})
+
+test('should preserve the TypeScript config location when the runtime wrapper loads the integration root config', () => {
+  const { wrapper, config } = loadRuntimeConfig()
+  assert.equal(path.posix.resolve(path.posix.dirname(wrapper.file), config.tsconfig), '/app/integration/tsconfig.json')
+})
+
 test('should support the root package when the image uses the previous nested test layout', () => {
   const command = bootstrap(['/app/integration/e2e/playwright.config.ts', '/app/package.json'])
   assert.equal(command.options.cwd, '/app')

@@ -14,6 +14,7 @@ FROM dependencies AS test-runtime
 
 COPY integration/e2e/ ./e2e/
 COPY integration/playwright.config.ts ./playwright.config.ts
+COPY integration/tsconfig.json ./tsconfig.json
 
 # Copy the container startup script
 COPY integration/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
