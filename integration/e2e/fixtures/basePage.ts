@@ -1,28 +1,9 @@
-// import {test as base} from '@playwright/test';
-//
 import { WorkspaceManagementPage } from '../page-objects/admin-shell/WorkspaceManagementPage'
-import { KeycloakLoginPage } from '../page-objects/common-components/KeycloakLoginPage'
-import { NavigationHeaderBar } from '../page-objects/common-components/NavigationHeaderBar'
-//
-// export const test = base.extend<{
-//     loginPage: KeycloakLoginPage;
-//     workspaceManagementPage: WorkspaceManagementPage;
-//     navigationHeaderBar:NavigationHeaderBar;
-//
-// }>({
-//     loginPage: async ({ page }, use) => {
-//         await use(new KeycloakLoginPage(page));
-//     },
-//     workspaceManagementPage: async ({ page }, use) => {
-//         await use(new WorkspaceManagementPage(page));
-//     },
-//     navigationHeaderBar: async ({ page }, use) => {
-//         await use(new NavigationHeaderBar(page));
-//     },
-// });
+import { KeycloakLoginPage, NavigationHeaderBar } from 'onecx-common-e2e'
 
 import { test as base } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
+import { environment } from '../utils/data/environment'
 
 type Fixtures = {
   loginPage: KeycloakLoginPage
@@ -33,7 +14,7 @@ type Fixtures = {
 
 export const test = base.extend<Fixtures>({
   loginPage: async ({ page }, use) => {
-    await use(new KeycloakLoginPage(page))
+    await use(new KeycloakLoginPage(page, environment.adminShell.loginUrl))
   },
 
   workspaceManagementPage: async ({ page }, use) => {
