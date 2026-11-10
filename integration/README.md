@@ -13,6 +13,12 @@ npm --prefix integration ci --include=dev --ignore-scripts --no-audit --no-fund
 npm --prefix integration run tests:gui
 ```
 
+Add or update E2E dependencies from the repository root with
+`npm --prefix integration install --save-dev <package>`, not a root-level install.
+Angular unit-test dependencies (Karma and Jasmine) remain in the root package.
+`onecx-common-e2e` is installed from the npm registry, so local, CI, and Docker
+installs do not require an external local tarball.
+
 `integration` is the automation root: `playwright.config.ts` selects tests from
 `e2e/tests`, and `tsconfig.json` covers both the Playwright configuration and all
 E2E TypeScript files. Do not put duplicate configuration files under `e2e`.

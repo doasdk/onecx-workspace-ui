@@ -25,6 +25,7 @@
     "allure-js-commons": "3.14.0",
     "allure-playwright": "3.14.0",
     "axe-core": "4.14.0",
-    "dotenv": "18.0.9"
+    "dotenv": "18.0.9",
+    "onecx-common-e2e": "^0.0.1"
   }
 }
