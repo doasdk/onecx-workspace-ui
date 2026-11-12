@@ -1,0 +1,5 @@
+**
+!integration/
+!integration/verification/
+!integration/verification/fixtures.spec.ts
+!integration/verification/playwright.config.ts

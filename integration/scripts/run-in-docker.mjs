@@ -122,6 +122,8 @@ try {
     docker(['cp', authFile, `${container}:/root/.docker/config.json`])
   }
   if (signal) throw new Error('Run interrupted before startup.')
+  console.log(`Starting integration run ${runId}. Platform startup and tests may take several minutes.`)
+  console.log(`Container ${container}; raw logs remain private. Results will be exported to results/${runId}.`)
   const attachStatus = await new Promise((resolveStatus, reject) => {
     const child = spawn('docker', ['start', '--attach', container], { stdio: ['ignore', logFd, logFd] })
     child.once('error', reject)

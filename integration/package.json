@@ -7,6 +7,7 @@
     "tests:gui": "playwright test --config=playwright.config.ts --grep=@gui",
     "tests:a11y": "playwright test --config=playwright.config.ts --grep=@a11y",
     "tests:all": "playwright test --config=playwright.config.ts",
+    "tests:fixtures": "playwright test --config=verification/playwright.config.ts",
     "image:build": "node scripts/image-command.mjs build",
     "image:push": "node scripts/image-command.mjs push",
     "it:dry-run": "node scripts/run-platform.mjs --dry-run",
@@ -26,6 +27,6 @@
     "allure-playwright": "3.14.0",
     "axe-core": "4.14.0",
     "dotenv": "18.0.9",
-    "onecx-common-e2e": "^0.0.1"
+    "onecx-common-e2e": "0.0.2"
   }
 }

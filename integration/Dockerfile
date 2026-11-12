@@ -1,4 +1,5 @@
-FROM mcr.microsoft.com/playwright:v1.64.0-noble AS dependencies
+ARG PLAYWRIGHT_RUNTIME_IMAGE=ghcr.io/doasdk/onecx-playwright:0.0.2
+FROM ${PLAYWRIGHT_RUNTIME_IMAGE} AS dependencies
 
 LABEL description="OneCX Playwright E2E tests"
 
@@ -15,13 +16,6 @@ FROM dependencies AS test-runtime
 COPY integration/e2e/ ./e2e/
 COPY integration/playwright.config.ts ./playwright.config.ts
 COPY integration/tsconfig.json ./tsconfig.json
-
-# Copy the container startup script
-COPY integration/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh
-
-ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 
 CMD ["tests:gui"]
 

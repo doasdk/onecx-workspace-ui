@@ -1,6 +1,5 @@
 import { test } from '../../../fixtures/basePage'
 import * as allure from 'allure-js-commons'
-import { users } from '../../../utils/data/testData'
 
 test.describe(
   'OneCX Workspace',
@@ -8,9 +7,7 @@ test.describe(
     tag: ['@e2e']
   },
   () => {
-    test.beforeEach(async ({ loginPage, workspaceManagementPage }) => {
-      await loginPage.navigateToLoginPage()
-      await loginPage.loginToKeycloak(users.onecxUser.username, users.onecxUser.password)
+    test.beforeEach(async ({ workspaceManagementPage }) => {
       await workspaceManagementPage.navigateTo()
     })
 
