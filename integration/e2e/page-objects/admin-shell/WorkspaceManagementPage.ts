@@ -36,7 +36,7 @@ export class WorkspaceManagementPage {
 
   async verifyPageTitle() {
     await allure.step('Navigate to OneCX Workspace Management page and verify page loaded', async () => {
-      await expect(this.page).toHaveTitle('OneCX Workspace - OneCX Admin')
+      await expect(this.page).toHaveTitle('OneCX Workspace')
     })
   }
 
