@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { execFileSync, spawnSync } from 'node:child_process'
 import { applySelection, components, decodeSelection, isRecord, parseJson, safeSummary } from './matrix.mjs'
 import { resolveTestImage } from './test-image-management.mjs'
+import { executionFailureStage } from './image-execution-contract.mjs'
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..')
 const integrationRoot = join(root, 'integration')
@@ -19,6 +20,7 @@ let secretDir
 let importerId
 let e2eContainer
 let allureResultsDir
+let executionManifest
 let stage = 'configuration'
 const started = new Date()
 const lock = parseJson(readFileSync(join(integrationRoot, 'package-lock.json'), 'utf8'), 'Dependency lockfile')
@@ -84,6 +86,7 @@ try {
   const config = applySelection(template, decodeSelection(process.env.MATRIX_SELECTION_BASE64), resolveTestImage())
   const e2e = config.platformConfig.container.e2e[0]
   allureResultsDir = join(runDir, 'e2e-results', e2e.networkAlias, 'allure-results')
+  executionManifest = join(runDir, 'e2e-results', e2e.networkAlias, 'execution.json')
   const environments = runtimeJson(
     'ENVIRONMENTS_JSON_FILE',
     'ENVIRONMENTS_JSON',
@@ -200,28 +203,27 @@ try {
     await manager.checkAllHealthy()
     assertNotInterrupted()
     stage = 'e2e'
-    const records =
-      process.env.E2E_EXECUTION_MODE === 'docker-copy'
-        ? await (
-            await import('./execute-image.mjs')
-          ).executeImage({
-            image: e2e.image,
-            metadata,
-            environments: parsedEnvironments,
-            data: parsedData,
-            environment: selectedEnvironment,
-            script: process.env.TEST_SCRIPT || 'tests:gui',
-            capture: privateArtifacts,
-            secretDir,
-            runDir,
-            alias: e2e.networkAlias,
-            timeoutMs: e2e.timeoutMs || 1800000,
-            onContainer: (name) => {
-              e2eContainer = name
-            }
-          })
-        : await manager.startE2eContainers(() => !!interruptedBy)
+    const records = await (
+      await import('./execute-image.mjs')
+    ).executeImage({
+      image: e2e.image,
+      metadata,
+      environments: parsedEnvironments,
+      data: parsedData,
+      environment: selectedEnvironment,
+      script: process.env.TEST_SCRIPT || 'tests:gui',
+      capture: privateArtifacts,
+      secretDir,
+      runDir,
+      alias: e2e.networkAlias,
+      timeoutMs: e2e.timeoutMs || 1800000,
+      isInterrupted: () => !!interruptedBy,
+      onContainer: (name) => {
+        e2eContainer = name
+      }
+    })
     summary.e2eExecutions = records || []
+    if (records.some((record) => !record.success)) summary.failureStage = executionFailureStage(records)
     if (
       records?.length === config.platformConfig.container.e2e.length &&
       records.every((record) => record.success) &&
@@ -270,6 +272,9 @@ try {
       summary.failureStage = 'report'
       console.error('Allure report generation failed.', generated.error || `Exit code: ${generated.status}`)
     }
+  }
+  if (executionManifest && existsSync(executionManifest)) {
+    cpSync(executionManifest, join(publicDir, 'execution.json'))
   }
   if (secretDir) rmSync(secretDir, { recursive: true, force: true })
   summary.endTime = new Date().toISOString()
