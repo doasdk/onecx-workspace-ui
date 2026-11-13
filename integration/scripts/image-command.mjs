@@ -1,7 +1,7 @@
 import 'dotenv/config'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
-import { imageCommand, resolveTestImage } from './test-image-management.mjs'
+import { imageCommand, resolveTestImage } from './image-management.mjs'
 
 if (process.argv.length !== 3) throw new Error('Usage: node integration/scripts/image-command.mjs <build|push>')
 const args = imageCommand(process.argv[2], resolveTestImage(), process.env.PLAYWRIGHT_RUNTIME_IMAGE)

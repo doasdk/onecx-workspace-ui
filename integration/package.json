@@ -9,20 +9,12 @@
     "tests:all": "playwright test --config=playwright.config.ts",
     "tests:fixtures": "playwright test --config=verification/playwright.config.ts",
     "image:build": "node scripts/image-command.mjs build",
-    "image:push": "node scripts/image-command.mjs push",
-    "it:dry-run": "node scripts/run-platform.mjs --dry-run",
-    "it:run": "node scripts/run-platform.mjs",
-    "it:docker": "node scripts/run-in-docker.mjs",
-    "it:serve": "node scripts/serve-platform.mjs",
-    "it:matrix": "node scripts/generate-matrix.mjs",
-    "it:test:matrix": "node scripts/test-matrix.mjs"
+    "image:push": "node scripts/image-command.mjs push"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",
-    "@onecx/integration-tests": "0.11.1",
     "@playwright/test": "1.64.0",
     "@types/node": "22.14.1",
-    "allure-commandline": "2.46.1",
     "allure-js-commons": "3.14.0",
     "allure-playwright": "3.14.0",
     "axe-core": "4.14.0",

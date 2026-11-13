@@ -33,13 +33,7 @@
     "image:push": "node integration/scripts/image-command.mjs push",
     "tests:gui": "npm --prefix integration run tests:gui --",
     "tests:a11y": "npm --prefix integration run tests:a11y --",
-    "tests:all": "npm --prefix integration run tests:all --",
-    "it:dry-run": "node integration/scripts/run-platform.mjs --dry-run",
-    "it:run": "node integration/scripts/run-platform.mjs",
-    "it:docker": "node integration/scripts/run-in-docker.mjs",
-    "it:serve": "node integration/scripts/serve-platform.mjs",
-    "it:matrix": "node integration/scripts/generate-matrix.mjs",
-    "it:test:matrix": "node integration/scripts/test-matrix.mjs"
+    "tests:all": "npm --prefix integration run tests:all --"
   },
   "husky": {
     "hooks": {

@@ -1,9 +1,18 @@
-import { validateImage } from './matrix.mjs'
+import { readFileSync } from 'node:fs'
 
-export const TEST_IMAGE = 'ghcr.io/doasdk/onecx-workspace-ui-e2e:0.0.7'
+function validateImage(image) {
+  if (
+    typeof image !== 'string' ||
+    !/^[a-z0-9][a-z0-9._:/-]*(?::[A-Za-z0-9_][A-Za-z0-9_.-]*|@sha256:[a-f0-9]{64})$/.test(image)
+  ) {
+    throw new Error('Images must be Docker references with an explicit tag or sha256 digest.')
+  }
+  return image
+}
 
 export function resolveTestImage(env = process.env) {
-  return validateImage(env.E2E_IMAGE || TEST_IMAGE)
+  const config = JSON.parse(readFileSync(new URL('../integration.config.json', import.meta.url), 'utf8'))
+  return validateImage(env.E2E_IMAGE || config.test.image)
 }
 
 export function imageCommand(action, image, runtimeImage) {
