@@ -1,0 +1,34 @@
+{
+  "schemaVersion": 1,
+  "platform": {
+    "config": "./platform.json"
+  },
+  "test": {
+    "image": "ghcr.io/doasdk/onecx-workspace-ui-e2e:0.0.8",
+    "script": "tests:gui",
+    "timeoutMs": 1800000
+  },
+  "matrix": "./versions.json",
+  "components": {
+    "core.postgres": "postgresdb",
+    "core.keycloak": "keycloak-app",
+    "core.importmanager": "importManager",
+    "services.iamKc": "onecx-iam-kc-svc",
+    "services.parameter": "onecx-parameter-svc",
+    "services.workspace": "onecx-workspace-svc",
+    "services.userProfile": "onecx-user-profile-svc",
+    "services.theme": "onecx-theme-svc",
+    "services.tenant": "onecx-tenant-svc",
+    "services.productStore": "onecx-product-store-svc",
+    "services.permission": "onecx-permission-svc",
+    "bff.parameter": "onecx-parameter-bff",
+    "bff.shell": "onecx-shell-bff",
+    "bff.workspace": "onecx-workspace-bff",
+    "ui.shell": "onecx-shell-ui",
+    "ui.workspace": "onecx-workspace-ui"
+  },
+  "environment": "container",
+  "artifacts": {
+    "capturePrivate": false
+  }
+}

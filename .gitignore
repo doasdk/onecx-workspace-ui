@@ -27,7 +27,6 @@ connect.lock
 typings
 *.log
 *.sh
-!/integration/docker-entrypoint.sh
 
 # System Files
 .DS_Store
@@ -53,3 +52,4 @@ Thumbs.db
 /integration/**/results/
 /integration-tests/
 /results/
+/.onecx-ci/

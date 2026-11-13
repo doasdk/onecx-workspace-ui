@@ -1,4 +1,4 @@
-ARG PLAYWRIGHT_RUNTIME_IMAGE=ghcr.io/doasdk/onecx-playwright:0.0.2
+ARG PLAYWRIGHT_RUNTIME_IMAGE=ghcr.io/doasdk/onecx-playwright:0.0.3
 FROM ${PLAYWRIGHT_RUNTIME_IMAGE} AS dependencies
 
 LABEL description="OneCX Playwright E2E tests"
@@ -18,23 +18,5 @@ COPY integration/playwright.config.ts ./playwright.config.ts
 COPY integration/tsconfig.json ./tsconfig.json
 
 CMD ["tests:gui"]
-
-FROM test-runtime AS orchestrator
-
-COPY --from=docker:27.5.1-cli /usr/local/bin/docker /usr/local/bin/docker
-RUN apt-get update -qq \
-    && apt-get install -y --no-install-recommends default-jre-headless \
-    && rm -rf /var/lib/apt/lists/* \
-    && mkdir -p /run/secrets /root/.docker
-
-COPY integration/scripts/ ./scripts/
-COPY integration/platform.json integration/versions.json ./
-
-RUN node scripts/patch-keycloak-startup.mjs \
-    && node scripts/patch-service-health.mjs \
-    && node scripts/patch-ui-cors.mjs
-
-ENTRYPOINT ["node", "/app/integration/scripts/run-platform.mjs"]
-CMD []
 
 FROM test-runtime AS e2e

@@ -6,16 +6,11 @@
 !integration/package.json
 !integration/package-lock.json
 
-# Inputs required by the e2e and orchestrator targets.
-!integration/docker-entrypoint.sh
+# Inputs required by the app test image.
 !integration/playwright.config.ts
 !integration/tsconfig.json
 !integration/e2e/
 !integration/e2e/**
-!integration/scripts/
-!integration/scripts/**
-!integration/platform.json
-!integration/versions.json
 
 # Never include runtime configuration or secrets.
 integration/e2e/utils/config/
