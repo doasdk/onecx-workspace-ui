@@ -195,15 +195,11 @@ Configure these repository variables:
 | `AGENT_E2E_IMAGE` | Published agent image; defaults to the image in `integration.agent.config.json` |
 
 Continue supplying `ENVIRONMENTS_JSON` and `TEST_DATA_JSON` as for deterministic
-tests. Add the separate GitHub Actions secret `AGENT_CONFIG_JSON`:
+tests. The orchestrator validates runtime configuration before provisioning the
+platform; no separate preflight job is required. Environment secrets take
+precedence over repository secrets of the same name.
 
-Before provisioning the agent platform, the `agent-preflight` job validates all
-three secrets using the selected orchestrator's validators. It uses the
-`integration` environment, like the reusable workflow, and reports only the
-configuration name and validation outcome. It never prints values or exception
-details. Environment secrets take precedence over repository secrets of the same
-name; a valid local file does not establish that the effective GitHub secret is
-the same file.
+Add the separate GitHub Actions secret `AGENT_CONFIG_JSON`:
 
 ```json
 {
