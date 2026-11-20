@@ -61,3 +61,17 @@ test('should omit app-owned reporter and media helpers when reusing the shared a
     assert.ok(!read('Dockerfile.dockerignore').includes(`!integration/agent/${helper}`))
   }
 })
+
+test('should validate effective environment secrets before starting the agent lane', () => {
+  const workflow = read('../.github/workflows/integration.yml')
+  const preflight = workflow.split('  agent-preflight:')[1].split('  agent:')[0]
+  assert.match(preflight, /environment: integration/)
+  for (const name of ['ENVIRONMENTS_JSON', 'TEST_DATA_JSON', 'AGENT_CONFIG_JSON']) {
+    assert.ok(preflight.includes(`${name}: \${{ secrets.${name} }}`))
+    assert.ok(preflight.includes(`--env ${name}`))
+  }
+  assert.match(preflight, /--network none/)
+  assert.match(preflight, /runner\/matrix\.mjs/)
+  assert.match(preflight, /runner\/agent-contract\.mjs/)
+  assert.match(workflow, /agent:\s+needs: agent-preflight/)
+})
