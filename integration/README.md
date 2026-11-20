@@ -224,6 +224,34 @@ browser observations enter the model context even though the browser runs
 inside your containers. Network policy, not a prompt, must enforce approved
 egress destinations.
 
+### Model connectivity diagnostics
+
+Run **Actions > Agent model network diagnostics > Run workflow** to check model
+connectivity without provisioning OneCX. A new workflow must first exist on the
+default branch to appear in the Actions UI; select the desired branch when
+dispatching it. No test-image rebuild is required: the diagnostic scripts are
+mounted into the published `AGENT_E2E_IMAGE`.
+
+The manual workflow uses the `integration` environment's `AGENT_CONFIG_JSON`
+secret and the `AGENT_E2E_IMAGE` variable. Private registries can optionally use
+the `DOCKER_AUTH_CONFIG` secret. It performs bounded DNS, TCP, HTTPS, and a minimal
+authenticated Anthropic-compatible `/v1/messages` request, stopping at the first
+failure. The model request sends only "Reply OK.", may incur a small model charge,
+and does not test browser tools or structured output.
+
+Results appear in the job log and run summary as check names, allowlisted error
+codes, and HTTP statuses. Hostnames, credentials, response bodies, and exception
+messages are not printed. HTTPS uses standard Node CA roots plus
+`extraCaCertPem`, when supplied; redirects are not followed. An HTTP error in the
+unauthenticated HTTPS check still proves the HTTPS connection succeeded; the
+authenticated model check requires HTTP 2xx.
+
+This uses a bridge-network container on a GitHub-hosted runner, not the exact
+provisioned platform network. DNS/timeouts can indicate missing corporate network
+access; certificate errors indicate CA trust problems; HTTP 401/403 requires
+checking credentials and gateway policies. A successful diagnostic does not
+guarantee that the complete Claude/MCP session will succeed.
+
 ### Build and local execution
 
 From the repository root:
