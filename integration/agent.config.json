@@ -1,0 +1,6 @@
+{
+  "schemaVersion": 1,
+  "prompt": "prompt/workspace.md",
+  "requiredChecks": ["workspace-page-title", "workspace-page-heading", "workspace-content-visible"],
+  "requiredTools": ["browser_snapshot", "browser_click"]
+}

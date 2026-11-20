@@ -19,6 +19,21 @@
   ],
   "overrides": [
     {
+      "files": ["*.mjs"],
+      "env": { "node": true },
+      "parserOptions": { "ecmaVersion": "latest", "sourceType": "module" }
+    },
+    {
+      "files": ["*.cjs"],
+      "env": { "node": true },
+      "parserOptions": { "ecmaVersion": "latest", "sourceType": "script" }
+    },
+    {
+      "files": ["*.d.cts"],
+      "parser": "@typescript-eslint/parser",
+      "parserOptions": { "ecmaVersion": "latest", "sourceType": "module" }
+    },
+    {
       "files": ["*.ts", "*.js"],
       "env": { "es6": true },
       "globals": { "__dirname": true },

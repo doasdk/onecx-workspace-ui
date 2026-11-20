@@ -31,6 +31,10 @@
     "apigen": "npm run apigen-cleanup && npm run apigen-generate && npm run apigen-format",
     "image:build": "node integration/scripts/image-command.mjs build",
     "image:push": "node integration/scripts/image-command.mjs push",
+    "image:agent:build": "node integration/scripts/image-command.mjs build agent",
+    "image:agent:push": "node integration/scripts/image-command.mjs push agent",
+    "tests:agent": "npm --prefix integration run tests:agent --",
+    "tests:agent:unit": "npm --prefix integration run tests:agent:unit",
     "tests:gui": "npm --prefix integration run tests:gui --",
     "tests:a11y": "npm --prefix integration run tests:a11y --",
     "tests:all": "npm --prefix integration run tests:all --"

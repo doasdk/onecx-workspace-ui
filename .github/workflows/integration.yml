@@ -2,12 +2,22 @@ name: OneCX integration matrix
 
 on:
   workflow_dispatch:
+    inputs:
+      suite:
+        description: Browser execution lanes (each provisions an isolated platform)
+        type: choice
+        default: deterministic
+        options:
+          - deterministic
+          - agent
+          - both
 
 permissions:
   contents: read
 
 jobs:
   integration:
+    if: inputs.suite != 'agent'
     uses: doasdk/onecx-playwright/.github/workflows/integration.yml@v0.0.3
     with:
       config-path: integration/integration.config.json
@@ -17,3 +27,17 @@ jobs:
     secrets:
       ENVIRONMENTS_JSON: ${{ secrets.ENVIRONMENTS_JSON }}
       TEST_DATA_JSON: ${{ secrets.TEST_DATA_JSON }}
+
+  agent:
+    if: inputs.suite == 'agent' || inputs.suite == 'both'
+    uses: doasdk/onecx-playwright/.github/workflows/integration.yml@v0.0.5
+    with:
+      config-path: integration/integration.agent.config.json
+      orchestrator-image: ${{ vars.AGENT_ORCHESTRATOR_IMAGE }}
+      e2e-image: ${{ vars.AGENT_E2E_IMAGE }}
+      max-parallel: 1
+      artifact-prefix: agent
+    secrets:
+      ENVIRONMENTS_JSON: ${{ secrets.ENVIRONMENTS_JSON }}
+      TEST_DATA_JSON: ${{ secrets.TEST_DATA_JSON }}
+      AGENT_CONFIG_JSON: ${{ secrets.AGENT_CONFIG_JSON }}

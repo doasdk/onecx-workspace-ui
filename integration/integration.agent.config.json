@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "extends": "./integration.config.json",
+  "test": {
+    "image": "ghcr.io/doasdk/onecx-workspace-ui-e2e-agent:0.0.1",
+    "script": "tests:agent",
+    "timeoutMs": 1800000
+  }
+}

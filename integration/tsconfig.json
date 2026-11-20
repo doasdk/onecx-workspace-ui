@@ -9,5 +9,11 @@
     "esModuleInterop": true,
     "experimentalDecorators": true
   },
-  "include": ["playwright.config.ts", "e2e/**/*.ts", "verification/**/*.ts"]
+  "include": [
+    "playwright.config.ts",
+    "agent.playwright.config.ts",
+    "e2e/**/*.ts",
+    "agent/**/*.ts",
+    "verification/**/*.ts"
+  ]
 }
