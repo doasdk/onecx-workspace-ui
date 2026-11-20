@@ -70,3 +70,65 @@ test('should accept a digest when pushing an image is not requested', () => {
   const image = `registry.example/app@sha256:${'a'.repeat(64)}`
   assert.equal(resolveTestImage({ E2E_IMAGE: image }), image)
 })
+
+test('should select the agent Docker target when building an agent image', () => {
+  assert.deepEqual(imageCommand('build', 'app-agent:local', undefined, 'agent'), [
+    'build',
+    '--file',
+    'integration/Dockerfile',
+    '--target',
+    'agent',
+    '-t',
+    'app-agent:local',
+    '.'
+  ])
+})
+
+test('should preserve runtime overrides when building an agent image', () => {
+  assert.ok(
+    imageCommand('build', 'agent:local', 'runtime:local', 'agent').includes('PLAYWRIGHT_RUNTIME_IMAGE=runtime:local')
+  )
+})
+
+test('should push the agent image when the agent target is selected', () => {
+  assert.deepEqual(imageCommand('push', 'agent:release', undefined, 'agent'), ['push', 'agent:release'])
+})
+
+test('should use the separate agent image override when resolving an agent image', () => {
+  assert.equal(resolveTestImage({ E2E_IMAGE: 'tests:local', AGENT_E2E_IMAGE: 'agent:local' }, 'agent'), 'agent:local')
+})
+
+test('should use the declarative agent image when only a deterministic override exists', () => {
+  assert.match(
+    resolveTestImage({ E2E_IMAGE: 'tests:local' }, 'agent'),
+    /^ghcr\.io\/doasdk\/onecx-workspace-ui-e2e-agent:/
+  )
+})
+
+test('should not use an agent image override when resolving deterministic tests', () => {
+  assert.match(resolveTestImage({ AGENT_E2E_IMAGE: 'agent:local' }), /^ghcr\.io\/doasdk\/onecx-workspace-ui-e2e:/)
+})
+
+test('should reject an unknown target when resolving images', () => {
+  assert.throws(() => resolveTestImage({}, 'unknown'), /target e2e or agent/)
+})
+
+test('should reject an unknown target when building images', () => {
+  assert.throws(() => imageCommand('build', 'app:local', undefined, 'unknown'), /target e2e or agent/)
+})
+
+test('should pass the shared agent runtime override when building an agent image', () => {
+  assert.ok(
+    imageCommand('build', 'agent:local', undefined, 'agent', 'shared:agent').includes(
+      'PLAYWRIGHT_AGENT_RUNTIME_IMAGE=shared:agent'
+    )
+  )
+})
+
+test('should not pass the shared agent runtime override when building deterministic images', () => {
+  assert.equal(imageCommand('build', 'tests:local', undefined, 'e2e', 'shared:agent').includes('shared:agent'), false)
+})
+
+test('should reject an invalid shared agent runtime reference', () => {
+  assert.throws(() => imageCommand('build', 'agent:local', undefined, 'agent', 'invalid image'), /Docker references/)
+})

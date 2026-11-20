@@ -8,8 +8,12 @@
     "tests:a11y": "playwright test --config=playwright.config.ts --grep=@a11y",
     "tests:all": "playwright test --config=playwright.config.ts",
     "tests:fixtures": "playwright test --config=verification/playwright.config.ts",
+    "tests:agent": "playwright test --config=agent/playwright.config.ts",
+    "tests:agent:unit": "node --test agent/*.test.mjs scripts/test-image-management.test.mjs scripts/test-agent-configuration.test.mjs",
     "image:build": "node scripts/image-command.mjs build",
-    "image:push": "node scripts/image-command.mjs push"
+    "image:push": "node scripts/image-command.mjs push",
+    "image:agent:build": "node scripts/image-command.mjs build agent",
+    "image:agent:push": "node scripts/image-command.mjs push agent"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.14.0",

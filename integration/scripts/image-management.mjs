@@ -10,24 +10,36 @@ function validateImage(image) {
   return image
 }
 
-export function resolveTestImage(env = process.env) {
-  const config = JSON.parse(readFileSync(new URL('../integration.config.json', import.meta.url), 'utf8'))
-  return validateImage(env.E2E_IMAGE || config.test.image)
+function validateTarget(target) {
+  if (!['e2e', 'agent'].includes(target)) throw new Error('Expected image target e2e or agent.')
+  return target
 }
 
-export function imageCommand(action, image, runtimeImage) {
+export function resolveTestImage(env = process.env, target = 'e2e') {
+  validateTarget(target)
+  const file = target === 'agent' ? '../integration.agent.config.json' : '../integration.config.json'
+  const config = JSON.parse(readFileSync(new URL(file, import.meta.url), 'utf8'))
+  return validateImage((target === 'agent' ? env.AGENT_E2E_IMAGE : env.E2E_IMAGE) || config.test.image)
+}
+
+export function imageCommand(action, image, runtimeImage, target = 'e2e', agentRuntimeImage) {
+  validateTarget(target)
   validateImage(image)
   if (!['build', 'push'].includes(action)) throw new Error('Expected build or push action.')
   if (image.includes('@')) throw new Error('Build/push requires an image tag, not a digest reference.')
   if (runtimeImage) validateImage(runtimeImage)
+  if (agentRuntimeImage) validateImage(agentRuntimeImage)
   return action === 'build'
     ? [
         'build',
         '--file',
         'integration/Dockerfile',
         '--target',
-        'e2e',
+        target,
         ...(runtimeImage ? ['--build-arg', `PLAYWRIGHT_RUNTIME_IMAGE=${runtimeImage}`] : []),
+        ...(target === 'agent' && agentRuntimeImage
+          ? ['--build-arg', `PLAYWRIGHT_AGENT_RUNTIME_IMAGE=${agentRuntimeImage}`]
+          : []),
         '-t',
         image,
         '.'

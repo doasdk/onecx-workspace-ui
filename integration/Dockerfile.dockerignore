@@ -11,6 +11,16 @@
 !integration/tsconfig.json
 !integration/e2e/
 !integration/e2e/**
+!integration/agent/
+!integration/agent/fixtures.ts
+!integration/agent/harness.cjs
+!integration/agent/harness.d.cts
+!integration/agent/workspace.agent.spec.ts
+!integration/agent/playwright.config.ts
+!integration/agent.config.json
+!integration/agent.playwright.config.ts
+!integration/prompt/
+!integration/prompt/**
 
 # Never include runtime configuration or secrets.
 integration/e2e/utils/config/
