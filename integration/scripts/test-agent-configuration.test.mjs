@@ -62,16 +62,12 @@ test('should omit app-owned reporter and media helpers when reusing the shared a
   }
 })
 
-test('should validate effective environment secrets before starting the agent lane', () => {
+test('should delegate agent execution directly to the shared workflow when selecting the agent lane', () => {
   const workflow = read('../.github/workflows/integration.yml')
-  const preflight = workflow.split('  agent-preflight:')[1].split('  agent:')[0]
-  assert.match(preflight, /environment: integration/)
+  const agent = workflow.split('  agent:')[1]
+  assert.doesNotMatch(agent, /^\s+needs:/m)
+  assert.match(agent, /uses: doasdk\/onecx-playwright\/\.github\/workflows\/integration\.yml@v0\.0\.5/)
   for (const name of ['ENVIRONMENTS_JSON', 'TEST_DATA_JSON', 'AGENT_CONFIG_JSON']) {
-    assert.ok(preflight.includes(`${name}: \${{ secrets.${name} }}`))
-    assert.ok(preflight.includes(`--env ${name}`))
+    assert.ok(agent.includes(`${name}: \${{ secrets.${name} }}`))
   }
-  assert.match(preflight, /--network none/)
-  assert.match(preflight, /runner\/matrix\.mjs/)
-  assert.match(preflight, /runner\/agent-contract\.mjs/)
-  assert.match(workflow, /agent:\s+needs: agent-preflight/)
 })

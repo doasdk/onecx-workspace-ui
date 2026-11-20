@@ -28,35 +28,7 @@ jobs:
       ENVIRONMENTS_JSON: ${{ secrets.ENVIRONMENTS_JSON }}
       TEST_DATA_JSON: ${{ secrets.TEST_DATA_JSON }}
 
-  agent-preflight:
-    if: inputs.suite == 'agent' || inputs.suite == 'both'
-    runs-on: ubuntu-24.04
-    environment: integration
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - name: Validate agent runtime secrets without printing their contents
-        env:
-          ORCHESTRATOR_IMAGE: ${{ vars.AGENT_ORCHESTRATOR_IMAGE }}
-          ENVIRONMENTS_JSON: ${{ secrets.ENVIRONMENTS_JSON }}
-          TEST_DATA_JSON: ${{ secrets.TEST_DATA_JSON }}
-          AGENT_CONFIG_JSON: ${{ secrets.AGENT_CONFIG_JSON }}
-        run: |
-          docker run --rm --network none \
-            --env ENVIRONMENTS_JSON --env TEST_DATA_JSON --env AGENT_CONFIG_JSON \
-            --mount "type=bind,src=$GITHUB_WORKSPACE/integration/scripts/validate-agent-secrets.mjs,dst=/validate-agent-secrets.mjs,readonly" \
-            --entrypoint node "$ORCHESTRATOR_IMAGE" --input-type=module -e '
-              import { runtimeJson } from "/opt/onecx-orchestrator/runner/matrix.mjs";
-              import { readAgentConfig } from "/opt/onecx-orchestrator/runner/agent-contract.mjs";
-              import { validateAgentSecrets } from "/validate-agent-secrets.mjs";
-              if (!validateAgentSecrets(process.env, { runtimeJson, readAgentConfig }, console.log)) {
-                process.exitCode = 1;
-              }
-            '
-
   agent:
-    needs: agent-preflight
     if: inputs.suite == 'agent' || inputs.suite == 'both'
     uses: doasdk/onecx-playwright/.github/workflows/integration.yml@v0.0.5
     with:
