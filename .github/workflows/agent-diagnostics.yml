@@ -1,0 +1,45 @@
+name: Agent model network diagnostics
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  diagnose:
+    runs-on: ubuntu-24.04
+    environment: integration
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Configure optional private registry access
+        env:
+          DOCKER_AUTH_CONFIG: ${{ secrets.DOCKER_AUTH_CONFIG }}
+        shell: bash
+        run: |
+          if [ -n "$DOCKER_AUTH_CONFIG" ]; then
+            umask 077
+            mkdir -p "$RUNNER_TEMP/agent-diagnostics-docker"
+            printf '%s' "$DOCKER_AUTH_CONFIG" > "$RUNNER_TEMP/agent-diagnostics-docker/config.json"
+            echo "DOCKER_CONFIG=$RUNNER_TEMP/agent-diagnostics-docker" >> "$GITHUB_ENV"
+          fi
+      - name: Check model connectivity inside the agent image
+        env:
+          AGENT_E2E_IMAGE: ${{ vars.AGENT_E2E_IMAGE }}
+          AGENT_CONFIG_JSON: ${{ secrets.AGENT_CONFIG_JSON }}
+        shell: bash
+        run: |
+          : "${AGENT_E2E_IMAGE:?Set the AGENT_E2E_IMAGE repository variable}"
+          docker pull "$AGENT_E2E_IMAGE"
+          docker run --rm --init --network bridge \
+            --env AGENT_CONFIG_JSON \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/integration/scripts,dst=/diagnostics,readonly" \
+            --entrypoint node "$AGENT_E2E_IMAGE" \
+            /diagnostics/run-agent-network-diagnostic.mjs | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Remove temporary registry credentials
+        if: always()
+        shell: bash
+        run: rm -f "$RUNNER_TEMP/agent-diagnostics-docker/config.json"
