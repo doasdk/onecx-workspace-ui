@@ -42,8 +42,6 @@ Thumbs.db
 /integration/**/allure-report/
 /integration/**/e2e-results/
 /integration/**/artifacts/
-/integration/e2e/utils/config/data.json
-/integration/e2e/utils/config/environments.json
 /integration/**/.env
 /integration/**/.env.*
 /integration/**/.generated/
@@ -53,3 +51,4 @@ Thumbs.db
 /integration-tests/
 /results/
 /.onecx-ci/
+/integration/e2e/utils/config/
